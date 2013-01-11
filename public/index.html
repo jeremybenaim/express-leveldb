@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>express-levelDB</title>
+	<link rel="stylesheet" href="/stylesheets/style.css">
+</head>
+<body>
+	<h1>express-levelDB</h1>
+
+	<h4>Click username to edit, press Enter to save</h4>
+
+	<ul id="users">
+		<li>
+			<a href="#" class="add"><span>&plus;</span>add user</a>
+		</li>
+	</ul>
+
+	<script src="http://code.jquery.com/jquery-1.8.3.min.js"></script>
+	<script>
+	!(function($) {
+		// READ ALL
+		$.getJSON('/users', function(data) {
+			var users = [], i;
+			
+			for (i=0; i < data.length; i++) {
+				users.push('<li data-id="' + data[i]._id + '"><a href="#" title="Delete user" class="delete">&times;</a><span class="editable" contenteditable spellcheck="false">' + data[i].name + '</span> <a href="#" class="read"><small>(log user)</small></a></li>');
+			}
+
+			$('#users').prepend(users.join(''));
+		});
+		// CREATE
+		$('#users').on('click', '.add', function (e) {
+			e.preventDefault();
+			var userName = window.prompt('Name plz');
+			if(userName){
+				$.ajax({
+					  type: 'POST'
+					, url: '/users/'
+					, data: { name: userName }
+				}).done( function( msg ) {
+					console.log('Response:', msg);
+					var id = msg.match(/#?[0-9]+(?:\.[0-9]*)?/)[0].substr(1)
+					  , html = '<li data-id="' + id + '"><a href="#" title="Delete user" class="delete">&times;</a><span class="editable" contenteditable spellcheck="false">' + userName + '</span> <a href="#" class="read"><small>(log user)</small></a></li>';
+
+					$(html).insertBefore($('.add'));
+				});
+			}
+		});
+		// READ 
+		$('#users').on('click', '.read', function (e) {
+			e.preventDefault();
+			$.getJSON('/users/' + $(this).parent().data('id'), function(data) {
+				console.log(data);
+			});
+		});
+		// UPDATE
+		$('#users').on('keypress', '.editable', function (e) {
+			var self = $(this);
+			if(e.keyCode === 13){
+				$.ajax({
+					  type: 'PUT'
+					, url: '/users/' + self.parent().data('id')
+					, data: { name: self.text() }
+				}).done( function( msg ) {
+					console.log('Response:', msg );
+				});
+				self.blur();
+			} else {
+				return;
+			}
+		});
+		// DELETE
+		$('#users').on('click', '.delete', function (e) {
+			e.preventDefault();
+			if(window.confirm('You sure?')){
+				var parent = $(this).parent();
+				$.ajax({
+					  type: 'DELETE'
+					, url: '/users/' + parent.data('id')
+				}).done( function( msg ) {
+					console.log('Response:', msg );
+					parent.remove();
+				});
+			}
+		});
+	})(jQuery);
+	</script>
+</body>
+</html>

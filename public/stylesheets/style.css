@@ -1,0 +1,35 @@
+body {
+	padding: 30px 50px;
+	font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+}
+
+a {
+	text-decoration: none;
+	color: inherit;
+}
+
+h1 {
+	text-transform: capitalize;
+}
+
+#users {
+	list-style: none;
+	padding: 0;
+}
+#users li {
+	line-height: 1.4;
+}
+#users .add {
+	line-height: 3;
+}
+
+#users .add span,
+#users .delete {
+	margin-right: 10px;
+}
+
+.editable:hover,
+.editable:focus {
+	outline: 0 none;
+	border-bottom: 1px dashed;
+}
