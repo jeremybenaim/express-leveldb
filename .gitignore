@@ -1,5 +1,4 @@
 node_modules
-my_db
 lib-cov
 *.seed
 *.log
