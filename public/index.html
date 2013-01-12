@@ -46,18 +46,13 @@
 		// CREATE
 		$('#users').on('click', '.add', function (e) {
 			e.preventDefault();
-			var userName = window.prompt('Enter username').replace(/(<([^>]+)>)/ig,"");
+			var userName = window.prompt('Enter username').replace(/(<([^>]+)>)/ig,""), html = '';
 
 			if (userName) {
-				$.ajax({type: 'POST', url: '/users/', data: {name: userName}}).done(function (msg) {
-					console.log('Response:', msg);
-					var id = msg.match(/#?[0-9]+(?:\.[0-9]*)?/)[0].substr(1),
-					 	html = '<li data-id="' + id + '"><a href="#" title="Delete user" class="delete">&times;</a><span class="editable" contenteditable spellcheck="false">' + userName + '</span> <a href="#" class="read"><small>(log user)</small></a></li>';
+				$.ajax({type: 'POST', url: '/users/', data: {name: userName}}).done(function (data) {
+					html = '<li data-id="' + data.data._id + '"><a href="#" title="Delete user" class="delete">&times;</a><span class="editable" contenteditable spellcheck="false">' + userName + '</span> <a href="#" class="read"><small>(log user)</small></a></li>';
 
 					socket.emit('create user', html);
-					/* 
-					 * without socket: $(html).insertBefore($('.add'));
-					 */
 				});
 			}
 		});
@@ -66,7 +61,7 @@
 		$('#users').on('click', '.read', function (e) {
 			e.preventDefault();
 			$.getJSON('/users/' + $(this).parent().data('id'), function (data) {
-				console.log(data);
+				console.log(data.data);
 			});
 		});
 
@@ -85,8 +80,7 @@
 					name = self.text().replace(/(<([^>]+)>)/ig,"") || 'johndoe', // obvious, right ?
 					id = self.parent().data('id');
 
-				$.ajax({type: 'PUT', url: '/users/' + id, data: {name: name}}).done(function (msg) {
-					console.log('Response:', msg);
+				$.ajax({type: 'PUT', url: '/users/' + id, data: {name: name}}).done(function (data) {
 					socket.emit('update user', {id: id, name: name});
 				});
 			}
@@ -99,12 +93,8 @@
 				var parent = $(this).parent(),
 					id = parent.data('id');
 
-				$.ajax({ type: 'DELETE', url: '/users/' + id}).done(function (msg) {
-					console.log('Response:', msg);
+				$.ajax({ type: 'DELETE', url: '/users/' + id}).done(function (data) {
 					socket.emit('delete user', id);
-					/* 
-					 * without socket: parent.remove();
-					 */
 				});
 			}
 		});

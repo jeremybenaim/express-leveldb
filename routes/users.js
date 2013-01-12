@@ -43,9 +43,11 @@ exports.create = function (req, res) {
 	u.set('_id', ts);
 
 	users.put(ts, u, function (err) {
-		if (err) return res.status(304).end('error');
-
-		res.send('user #' + ts + ' successfully created');
+		if (err) {
+			console.log(err);
+			return res.json(500, {'error': {'message': 'Oops, error. Not sure about what happened here.'}});
+		}
+		res.json({'success': 'User successfully created!', 'data': u});
 	});
 };
 
@@ -57,7 +59,10 @@ exports.update = function (req, res) {
 		id = req.params.id;
 
 	users.get(id, function (err, value) {
-		if (err) return res.status(304).end('error');
+		if (err) {
+			console.log(err);
+			return res.json(400, {'error': {'message': 'User not found'}});
+		}
 
 		// create a new User object from the value returned by the DB...
 		var u = new User(value);
@@ -69,9 +74,12 @@ exports.update = function (req, res) {
 		}
 
 		users.put(id, u, function (err) {
-			if (err) return res.status(304).end('error');
+			if (err) {
+				console.log(err);
+				return res.json(500, {'error': {'message': 'Oops, error. Not sure about what happened here.'}});
+			}
 
-			res.end('user successfully updated');
+			res.json({'success': 'User successfully updated!', 'data': u});
 		});
 
 	});
@@ -84,9 +92,12 @@ exports.del = function (req, res) {
 	var id = req.params.id;
 
 	users.del(id, function (err) {
-		if (err) return res.status(304).end('error');
+		if (err) {
+			console.log(err);
+			return res.json(400, {'error': {'message': 'User not found'}});
+		}
 
-		res.end('user successfully removed');
+		res.json({'success': 'User successfully removed!'});
 	});
 };
 
@@ -98,8 +109,12 @@ exports.findOne = function (req, res) {
 	var id = req.params.id;
 
 	users.get(id, function (err, value) {
-		if (err) return res.status(404).end('user does not exist');
-		res.json(value);
+		if (err){
+			console.log(err);
+			return res.json(400, {'error': {'message': 'User not found'}});
+		}
+
+		res.json({'success': 'User exists!', 'data' : value});
 	});
 };
 
