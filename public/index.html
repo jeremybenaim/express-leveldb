@@ -82,7 +82,7 @@
 			},
 			'blur' : function() {
 				var self = $(this),
-					name = self.text() || 'johndoe', // obvious, right ?
+					name = self.text().replace(/(<([^>]+)>)/ig,"") || 'johndoe', // obvious, right ?
 					id = self.parent().data('id');
 
 				$.ajax({type: 'PUT', url: '/users/' + id, data: {name: name}}).done(function (msg) {
