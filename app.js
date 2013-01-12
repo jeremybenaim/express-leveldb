@@ -21,6 +21,7 @@ app.configure('development', function () {
 	app.use(express.errorHandler());
 });
 
+
 var users = require('./routes/users');
 
 app.get('/users', users.findAll)
@@ -32,6 +33,22 @@ app.del('/users/:id', users.del)
 // Uncomment this if you want to use Express to serve the home page
 // app.get('/', routes.index);
 
-http.createServer(app).listen(app.get('port'), function () {
+
+var server = http.createServer(app),
+		io = require('socket.io').listen(server);
+
+io.sockets.on('connection', function (socket) {
+	socket.on('create user', function (data) {
+		io.sockets.emit('create user', data);
+	});
+	socket.on('update user', function (data) {
+		io.sockets.emit('update user', data);
+	});
+	socket.on('delete user', function (id) {
+		io.sockets.emit('delete user', id);
+	});
+});
+
+server.listen(app.get('port'), function () {
 	console.log("Express server listening on port " + app.get('port'));
 });

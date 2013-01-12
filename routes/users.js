@@ -1,6 +1,5 @@
 var levelup = require('levelup'),
-	namespace = require('level-namespace'),
-	
+	namespace = require('level-namespace'),	
 	db = levelup('/tmp/my_db', {encoding: 'json', createIfMissing: true}, function (err, db) {
 		if (err) return console.log('Ooops!', err);
 		console.log('Connected to levelDB database', db._location)
@@ -41,8 +40,8 @@ User.prototype = {
  * Create a new user
  */
 exports.create = function (req, res) {
-	var user = req.body
-	  , ts = Math.round(new Date().getTime())
+	var user = req.body,
+		ts = Math.round(new Date().getTime())
 
 	var u = new User(user);
 	u.set('_id', ts);
@@ -58,8 +57,8 @@ exports.create = function (req, res) {
  * Update an existing user
  */
 exports.update = function (req, res) {
-	var user = req.body
-	  , id = req.params.id;
+	var user = req.body,
+		id = req.params.id;
 
 	users.get(id, function (err, value) {
 		if (err) return res.status(304).end('error');
@@ -115,13 +114,13 @@ exports.findOne = function (req, res) {
 exports.findAll = function (req, res) {
 	var all = [];
 	users.valueStream()
-		.on('data', function (data) {
-			all.push(data);
-		})
-		.on('error', function (err) {
-			console.log('Oh my!', err)
-		})
-		.on('end', function () {
-			res.json(all);
-		});
+	  .on('data', function (data) {
+	  	all.push(data);
+	  })
+	  .on('error', function (err) {
+	  	console.log('Oh my!', err)
+	  })
+	  .on('end', function () {
+	  	res.json(all);
+	  });
 };

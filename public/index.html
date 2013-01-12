@@ -16,11 +16,24 @@
 		</li>
 	</ul>
 
-	<script src="http://code.jquery.com/jquery-1.8.3.min.js"></script>
+	<script src="//code.jquery.com/jquery-1.8.3.min.js"></script>
+	<script src="/socket.io/socket.io.js"></script>
 	<script>
 	!(function($) {
+
+		var socket = io.connect('http://localhost');
+		socket.on('create user', function (html) {
+			$(html).insertBefore($('.add'));
+		});
+		socket.on('update user', function (data) {
+			$('span', 'li[data-id="' + data.id + '"]').text(data.name);			
+		});
+		socket.on('delete user', function (id) {
+			$('li[data-id="' + id + '"]').remove()
+		});
+
 		// READ ALL
-		$.getJSON('/users', function(data) {
+		$.getJSON('/users', function (data) {
 			var users = [], i;
 			
 			for (i=0; i < data.length; i++) {
@@ -29,58 +42,69 @@
 
 			$('#users').prepend(users.join(''));
 		});
+
 		// CREATE
 		$('#users').on('click', '.add', function (e) {
 			e.preventDefault();
-			var userName = window.prompt('Name plz');
-			if(userName){
-				$.ajax({
-					  type: 'POST'
-					, url: '/users/'
-					, data: { name: userName }
-				}).done( function( msg ) {
-					console.log('Response:', msg);
-					var id = msg.match(/#?[0-9]+(?:\.[0-9]*)?/)[0].substr(1)
-					  , html = '<li data-id="' + id + '"><a href="#" title="Delete user" class="delete">&times;</a><span class="editable" contenteditable spellcheck="false">' + userName + '</span> <a href="#" class="read"><small>(log user)</small></a></li>';
+			var userName = window.prompt('Enter username').replace(/(<([^>]+)>)/ig,"");
 
-					$(html).insertBefore($('.add'));
+			if (userName) {
+				$.ajax({type: 'POST', url: '/users/', data: {name: userName}}).done(function (msg) {
+					console.log('Response:', msg);
+					var id = msg.match(/#?[0-9]+(?:\.[0-9]*)?/)[0].substr(1),
+					 	html = '<li data-id="' + id + '"><a href="#" title="Delete user" class="delete">&times;</a><span class="editable" contenteditable spellcheck="false">' + userName + '</span> <a href="#" class="read"><small>(log user)</small></a></li>';
+
+					socket.emit('create user', html);
+					/* 
+					 * without socket: $(html).insertBefore($('.add'));
+					 */
 				});
 			}
 		});
+
 		// READ 
 		$('#users').on('click', '.read', function (e) {
 			e.preventDefault();
-			$.getJSON('/users/' + $(this).parent().data('id'), function(data) {
+			$.getJSON('/users/' + $(this).parent().data('id'), function (data) {
 				console.log(data);
 			});
 		});
+
 		// UPDATE
-		$('#users').on('keypress', '.editable', function (e) {
-			var self = $(this);
-			if(e.keyCode === 13){
-				$.ajax({
-					  type: 'PUT'
-					, url: '/users/' + self.parent().data('id')
-					, data: { name: self.text() }
-				}).done( function( msg ) {
-					console.log('Response:', msg );
+		$('#users').on({
+			'keypress' : function (e) {
+				if (e.keyCode === 13) {
+					e.preventDefault();
+					$(this).blur();
+				} else {
+					return;
+				}
+			},
+			'blur' : function() {
+				var self = $(this),
+					name = self.text() || 'johndoe', // obvious, right ?
+					id = self.parent().data('id');
+
+				$.ajax({type: 'PUT', url: '/users/' + id, data: {name: name}}).done(function (msg) {
+					console.log('Response:', msg);
+					socket.emit('update user', {id: id, name: name});
 				});
-				self.blur();
-			} else {
-				return;
 			}
-		});
+		}, '.editable');
+
 		// DELETE
 		$('#users').on('click', '.delete', function (e) {
 			e.preventDefault();
-			if(window.confirm('You sure?')){
-				var parent = $(this).parent();
-				$.ajax({
-					  type: 'DELETE'
-					, url: '/users/' + parent.data('id')
-				}).done( function( msg ) {
-					console.log('Response:', msg );
-					parent.remove();
+			if (window.confirm('Are you sure?')) {
+				var parent = $(this).parent(),
+					id = parent.data('id');
+
+				$.ajax({ type: 'DELETE', url: '/users/' + id}).done(function (msg) {
+					console.log('Response:', msg);
+					socket.emit('delete user', id);
+					/* 
+					 * without socket: parent.remove();
+					 */
 				});
 			}
 		});
