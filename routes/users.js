@@ -1,9 +1,5 @@
-var levelup = require('levelup'),
-	namespace = require('level-namespace'),	
-	db = levelup('/tmp/my_db', {encoding: 'json', createIfMissing: true}, function (err, db) {
-		if (err) return console.log('Ooops!', err);
-		console.log('Connected to levelDB database', db._location)
-	});
+var db = require('../leveldb').connect(),
+	namespace = require('level-namespace');
 
 /*
  * Setting up namespace "users" for leveldb

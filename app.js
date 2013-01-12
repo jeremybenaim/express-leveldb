@@ -21,7 +21,6 @@ app.configure('development', function () {
 	app.use(express.errorHandler());
 });
 
-
 var users = require('./routes/users');
 
 app.get('/users', users.findAll)
@@ -32,7 +31,6 @@ app.del('/users/:id', users.del)
 
 // Uncomment this if you want to use Express to serve the home page
 // app.get('/', routes.index);
-
 
 var server = http.createServer(app),
 		io = require('socket.io').listen(server);
