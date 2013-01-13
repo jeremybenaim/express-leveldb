@@ -1,5 +1,6 @@
-var db = require('../leveldb').connect(),
-	namespace = require('level-namespace');
+var uuid = require('node-uuid'),
+	db = require('../leveldb').connect(),
+	namespace = require('level-namespace')
 
 /*
  * Setting up namespace "users" for leveldb
@@ -37,12 +38,12 @@ User.prototype = {
  */
 exports.create = function (req, res) {
 	var user = req.body,
-		ts = Math.round(new Date().getTime())
+		id = uuid.v1();
 
 	var u = new User(user);
-	u.set('_id', ts);
+	u.set('_id', id);
 
-	users.put(ts, u, function (err) {
+	users.put(id, u, function (err) {
 		if (err) {
 			console.log(err);
 			return res.json(500, {'error': {'message': 'Oops, error. Not sure about what happened here.'}});
