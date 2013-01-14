@@ -22,15 +22,13 @@ function User(data) {
 
 	return this
 };
-User.prototype = {
-	get: function (val) {
-		return this[val];
-	},
-	set: function (val, data) {
-		this[val] = data;
-	}
-	// TODO: add validation methods here, maybe?
-};
+User.prototype.get = function (val) {
+	return this[val];
+},
+User.prototype.set = function (val, data) {
+	this[val] = data;
+}
+// TODO: add validation methods here, maybe?
 
 
 /*
