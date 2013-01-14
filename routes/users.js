@@ -24,10 +24,10 @@ function User(data) {
 };
 User.prototype.get = function (val) {
 	return this[val];
-},
+};
 User.prototype.set = function (val, data) {
 	this[val] = data;
-}
+};
 // TODO: add validation methods here, maybe?
 
 
