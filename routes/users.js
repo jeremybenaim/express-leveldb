@@ -1,6 +1,13 @@
 var uuid = require('node-uuid'),
 	db = require('../leveldb').connect(),
-	namespace = require('level-namespace')
+	namespace = require('level-namespace');
+
+
+var elastical = require('elastical'),
+	es_client = new elastical.Client();
+
+var INDEX = 'express-leveldb', TYPE = 'users';
+
 
 /*
  * Setting up namespace "users" for leveldb
@@ -42,6 +49,15 @@ exports.create = function (req, res) {
 
 	var u = new User(user);
 	u.set('_id', id);
+
+
+	es_client.index(INDEX, TYPE, {
+		'leveldb-id'  : id,
+	    'name': u.get('name')
+	}, function (err, res) {
+		if(err) console.log(err);
+	    console.log('es_server responded', res)
+	});
 
 	users.put(id, u, function (err) {
 		if (err) {
@@ -135,4 +151,12 @@ exports.findAll = function (req, res) {
 	  .on('end', function () {
 	  	res.json(all);
 	  });
+};
+
+
+/*
+ * Search through all users (using elasticsearch)
+ */
+exports.search = function (req, res) {
+
 };
