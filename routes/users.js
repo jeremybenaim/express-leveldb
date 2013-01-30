@@ -1,19 +1,27 @@
 var uuid = require('node-uuid'),
-	db = require('../leveldb').connect(),
-	namespace = require('level-namespace');
+	db = require('../leveldb').connect();
 
-
-var elastical = require('elastical'),
-	es_client = new elastical.Client();
-
-var INDEX = 'express-leveldb', TYPE = 'users';
+/*
+ * Setting up hooks
+ */
+// var hooks = require('level-hooks');
+// hooks()(db);
 
 
 /*
  * Setting up namespace "users" for leveldb
  */
-namespace(db)
+var namespace = require('level-namespace');
+namespace(db);
 var users = db.namespace('users');
+
+/*
+ * Setting up elasticsearch
+ */
+var elastical = require('elastical'),
+	es_client = new elastical.Client(),
+	INDEX = 'express-leveldb', // this would never change (see it as the ES counterpart of our DB)
+	TYPE = 'users';	// this is the the type of document (== to the namespace)
 
 
 /*
@@ -50,21 +58,18 @@ exports.create = function (req, res) {
 	var u = new User(user);
 	u.set('_id', id);
 
-
-	es_client.index(INDEX, TYPE, {
-		'leveldb-id'  : id,
-	    'name': u.get('name')
-	}, function (err, res) {
-		if(err) console.log(err);
-	    console.log('es_server responded', res)
-	});
-
 	users.put(id, u, function (err) {
 		if (err) {
 			console.log(err);
 			return res.json(500, {'error': {'message': 'Oops, error. Not sure about what happened here.'}});
 		}
 		res.json({'success': 'User successfully created!', 'data': u});
+		
+		es_client.index(INDEX, TYPE, {name: u.get('name')}, {id: u.get('_id')}, function (err, res) {
+			if(err) console.log(err);
+			console.log('User successfully added to the index', INDEX, 'w/ type', TYPE)
+		});
+
 	});
 };
 
@@ -96,6 +101,11 @@ exports.update = function (req, res) {
 				return res.json(500, {'error': {'message': 'Oops, error. Not sure about what happened here.'}});
 			}
 
+			es_client.index(INDEX, TYPE, {name: u.get('name')}, {id: u.get('_id')}, function (err, res) {
+				if(err) console.log(err);
+				console.log('User successfully updated in the index', INDEX, 'w/ type', TYPE)
+			});
+
 			res.json({'success': 'User successfully updated!', 'data': u});
 		});
 
@@ -115,6 +125,12 @@ exports.del = function (req, res) {
 		}
 
 		res.json({'success': 'User successfully removed!'});
+		
+		es_client.delete(INDEX, TYPE, id, function (err, res) {
+			if(err) console.log(err);
+		    console.log('User successfully deleted from the index', INDEX, 'w/ type', TYPE)
+		});
+		
 	});
 };
 
@@ -151,6 +167,18 @@ exports.findAll = function (req, res) {
 	  .on('end', function () {
 	  	res.json(all);
 	  });
+	
+	es_client.search({"query":{"match_all":{}}}, function (err, results, res) {
+    	if (!err) {
+	    	var hits = [], i;
+
+	    	for (i in results.hits){
+	    		hits.push(results.hits[i]._source)
+	    	}
+
+    		console.log('\n results \n', hits);
+	    }
+    });
 };
 
 
@@ -158,5 +186,5 @@ exports.findAll = function (req, res) {
  * Search through all users (using elasticsearch)
  */
 exports.search = function (req, res) {
-
+	var id = req.params.id;
 };

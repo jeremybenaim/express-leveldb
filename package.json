@@ -1,15 +1,16 @@
 {
-  "name": "application-name",
+  "name": "express-leveldb",
   "version": "0.0.1",
   "private": true,
   "scripts": {
     "start": "node app"
   },
   "dependencies": {
-    "express": "3.0.6",
+    "express": "~3.0.6",
     "jade": "*",
     "levelup": "~0.4.4",
     "level-namespace": "0.0.3",
+    "level-hooks": "~1.1.2",
     "socket.io": "~0.9.13",
     "node-uuid": "~1.4.0"
   }

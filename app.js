@@ -23,11 +23,11 @@ app.configure('development', function () {
 
 var users = require('./routes/users');
 
-app.get('/users', users.findAll)
-app.post('/users', users.create)
-app.get('/users/:id', users.findOne)
-app.put('/users/:id', users.update)
-app.del('/users/:id', users.del)
+app.get('/users', users.findAll);
+app.post('/users', users.create);
+app.get('/users/:id', users.findOne);
+app.put('/users/:id', users.update);
+app.del('/users/:id', users.del);
 
 // Uncomment this if you want to use Express to serve the home page
 // app.get('/', routes.index);
