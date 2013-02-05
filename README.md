@@ -20,7 +20,7 @@ Search urls :
 http://localhost:3000/search/users/name=test
 http://localhost:3000/search/autocomplete/users/name=t
 ```
-would returns
+would returns (supposing you created a user whose name would be "test")
 ```
 {
 count: 1,
