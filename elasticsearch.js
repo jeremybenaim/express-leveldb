@@ -1,6 +1,9 @@
 var elastical = require('elastical'),
 	_es_client = new elastical.Client();
 
+/*
+ * Exposing elasticsearch client
+ */
 exports.client = function () {
 	return _es_client;
 };

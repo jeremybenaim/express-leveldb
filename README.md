@@ -4,7 +4,7 @@ express-leveldb
 Sample app using:
 + express (https://github.com/visionmedia/express)
 + leveldb (thru [node-levelup](https://github.com/rvagg/node-levelup))
-+ elasticsearch (w/ [node-elastical](https://github.com/rgrove/node-elastical))
++ elasticsearch (w/ [node-elastical](https://github.com/ramv/node-elastical))
 + level-namespace (https://github.com/kesla/level-namespace)
 + level-hooks (https://github.com/dominictarr/level-hooks)
 

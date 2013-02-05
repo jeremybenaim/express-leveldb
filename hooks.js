@@ -29,5 +29,3 @@ db.hooks.post(function (ch) {
 	
 	console.log(' ✔'.green + ' elasticsearch index updated');
 })
-
-
