@@ -7,7 +7,7 @@ var db = require('./leveldb').connect(),
  * Setting up elasticsearch client
  */
 var es_client = require('./elasticsearch').client(),
-	ES_INDEX = 'express-leveldb';
+	ES_INDEX = 'express-leveldb',
 	ES_TYPE = '';
 
 

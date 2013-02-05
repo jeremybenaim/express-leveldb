@@ -8,18 +8,19 @@ exports.client = function () {
 /*
  * Setting up elasticsearch client
  */
-var ES_INDEX = 'express-leveldb';
+var ES_INDEX = 'express-leveldb',
 	ES_TYPE = '';
 
 /*
  * Search through all users (using elasticsearch)
  */
 exports.search = function (req, res) {
-	var type = req.params.type,
-		field = req.params.field,
+	var field = req.params.field,
 		query = req.params.query;
 
-	var q = {"query":{"query_string":{"default_field":field,"query":query}}};
+	ES_TYPE = req.params.type;
+
+	var q = {"query": {"query_string": {"default_field": field, "query": query}}, "index": ES_INDEX, "type": ES_TYPE};
 
 	_es_client.search(q, function (err, results, response) {
 		if (err) {
@@ -44,10 +45,12 @@ exports.search = function (req, res) {
  * Search through all users with a wildcard positioned by default
  */
 exports.autocomplete = function (req, res) {
-	var field = req.params.field;
+	var field = req.params.field,
 		query = req.params.query + '*';
-
-	var q = {"query":{"query_string":{"default_field":field,"query":query}}};
+	
+	ES_TYPE = req.params.type;
+	
+	var q = {"query": {"query_string": {"default_field": field, "query": query}}, "index": ES_INDEX, "type": ES_TYPE};
 
 	_es_client.search(q, function (err, results, response) {
 		if (err) {
