@@ -21,7 +21,10 @@ app.configure('development', function () {
 	app.use(express.errorHandler());
 });
 
-var users = require('./routes/users');
+
+var hooks = require('./hooks'),
+	users = require('./routes/users'),
+	search = require('./elasticsearch');
 
 app.get('/users', users.findAll);
 app.post('/users', users.create);
@@ -29,8 +32,13 @@ app.get('/users/:id', users.findOne);
 app.put('/users/:id', users.update);
 app.del('/users/:id', users.del);
 
+app.get('/search/:type/:field=:query', search.search);
+app.get('/search/autocomplete/:type/:field=:query', search.autocomplete);
+
+
 // Uncomment this if you want to use Express to serve the home page
 // app.get('/', routes.index);
+
 
 var server = http.createServer(app),
 		io = require('socket.io').listen(server);
